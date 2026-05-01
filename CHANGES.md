@@ -41,6 +41,19 @@ high-level changes per release/branch. For file-level history, use `git log`.
 - `README.md` — rewritten to describe Sauron AI; build instructions
   retained, attribution to upstream Servo preserved and expanded.
 
+### Modified MPL-2.0 files (continued, new tab branding)
+
+- `resources/resource_protocol/newtab.html` — `<title>` rebranded to
+  "Sauron - New Tab", logo swapped to `sauron.svg`, "Home" link and
+  logo target now point to https://tree-cloud.com.
+- `resources/resource_protocol/newtab.css` — image width tightened
+  and dark-mode `filter: invert(1)` added so the monochrome Sauron
+  SVG is visible on the dark theme.
+- `ports/servoshell/prefs.rs` — default homepage and CLI URL fallback
+  changed from `https://(www.)servo.org` to `resource:///newtab.html`
+  so a fresh launch lands on the Sauron new-tab page instead of the
+  upstream Servo project site.
+
 ### Renamed
 
 - `resources/org.servo.Servo.desktop` → `resources/com.treecloud.sauron.desktop`

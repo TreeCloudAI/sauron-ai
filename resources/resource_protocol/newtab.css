@@ -21,7 +21,14 @@ body {
 
 img {
   margin-bottom: 1em;
-  width: 25vw;
+  width: 18vw;
+  max-width: 220px;
+}
+
+@media (prefers-color-scheme: dark) {
+  img {
+    filter: invert(1);
+  }
 }
 
 form {
