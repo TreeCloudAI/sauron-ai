@@ -54,6 +54,12 @@ high-level changes per release/branch. For file-level history, use `git log`.
   so a fresh launch lands on the Sauron new-tab page instead of the
   upstream Servo project site.
 
+### Modified MPL-2.0 files (continued, agentic layer)
+
+- `Cargo.toml` — added `components/sauron_agent` to `workspace.members`
+  so the new TreeCloud-authored agent crate participates in the
+  workspace. The crate itself is Apache-2.0 (see below).
+
 ### Renamed
 
 - `resources/org.servo.Servo.desktop` → `resources/com.treecloud.sauron.desktop`
@@ -67,3 +73,8 @@ high-level changes per release/branch. For file-level history, use `git log`.
 - `resources/sauron.svg` — Sauron logo (vector). PNG/ICO/ICNS variants
   pending — until they exist, the macOS bundle and Windows .exe still
   embed Servo's icons.
+- `components/sauron_agent/` — scaffold for the agentic runtime
+  (Apache-2.0). Defines public types `Agent`, `Goal`, `Observation`,
+  `Turn`, `Tool`, `ToolCall`, `ToolResult`, `AgentError`. The actual
+  LLM provider integration and browser-side tool dispatch are
+  intentionally not yet wired up.

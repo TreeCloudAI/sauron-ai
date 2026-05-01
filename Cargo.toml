@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "components/media/examples",
+    "components/sauron_agent",
     "components/xpath",
     "ports/servoshell",
     "tests/unit/*",

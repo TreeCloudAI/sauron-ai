@@ -1,0 +1,20 @@
+[package]
+name = "sauron_agent"
+version = "0.1.0"
+authors = ["TreeCloud AI"]
+description = "Agentic layer for Sauron AI — orchestrates LLM-driven browser automation."
+license = "Apache-2.0"
+edition = "2024"
+publish = false
+repository = "https://github.com/TreeCloudAI/sauron-ai"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+# Core async + serialization (already pinned at the workspace level by Servo).
+tokio = { workspace = true, features = ["rt-multi-thread", "sync", "macros"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+log = { workspace = true }
+thiserror = "2.0"
