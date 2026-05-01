@@ -26,11 +26,16 @@
 //! depend on a stable surface while implementations land.
 
 pub mod agent;
+pub mod anthropic;
 pub mod error;
 pub mod messages;
 pub mod tools;
 
-pub use agent::Agent;
+pub use agent::{Agent, ToolDispatcher};
+pub use anthropic::{
+    AnthropicProvider, ContentBlock, DEFAULT_MODEL, ProviderMessage, ProviderResponse, Role,
+    StopReason,
+};
 pub use error::{AgentError, Result};
 pub use messages::{Goal, Observation, Turn};
 pub use tools::{Tool, ToolCall, ToolResult};
