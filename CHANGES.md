@@ -54,6 +54,19 @@ high-level changes per release/branch. For file-level history, use `git log`.
   so a fresh launch lands on the Sauron new-tab page instead of the
   upstream Servo project site.
 
+### Modified MPL-2.0 files (continued, view-source feature)
+
+- `ports/servoshell/Cargo.toml` — added `ureq` dep used by the new
+  view-source: protocol handler.
+- `ports/servoshell/desktop/protocols/mod.rs` — registered the new
+  `view_source` submodule.
+- `ports/servoshell/desktop/app.rs` — registered `view-source` as a
+  custom protocol scheme.
+- `ports/servoshell/desktop/headed_window.rs` — added the `Ctrl+U`
+  shortcut that opens the active webview's URL via `view-source:` in
+  a new tab. Internal schemes (`view-source`, `about`, `resource`,
+  `servo`) are skipped.
+
 ### Renamed
 
 - `resources/org.servo.Servo.desktop` → `resources/com.treecloud.sauron.desktop`
@@ -67,3 +80,7 @@ high-level changes per release/branch. For file-level history, use `git log`.
 - `resources/sauron.svg` — Sauron logo (vector). PNG/ICO/ICNS variants
   pending — until they exist, the macOS bundle and Windows .exe still
   embed Servo's icons.
+- `ports/servoshell/desktop/protocols/view_source.rs` — Apache-2.0
+  protocol handler that serves `view-source:<inner-url>` by performing
+  a blocking outbound fetch (ureq, on a `tokio::task::spawn_blocking`
+  thread) and rendering the bytes inside a styled `<pre>` element.

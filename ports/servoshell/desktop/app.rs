@@ -88,6 +88,10 @@ impl App {
             "resource",
             protocols::resource::ResourceProtocolHandler::default(),
         );
+        let _ = protocol_registry.register(
+            "view-source",
+            protocols::view_source::ViewSourceProtocolHandler::default(),
+        );
 
         let servo_builder = ServoBuilder::default()
             .opts(self.opts.clone())

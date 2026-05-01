@@ -444,6 +444,29 @@ impl HeadedWindow {
                         .expect("Should be able to unconditionally parse 'servo:newtab' as URL"),
                 );
             })
+            // Sauron AI: Ctrl+U opens the current page's source via the
+            // `view-source:` protocol handler in a new tab. The active
+            // webview's URL is fed verbatim; the handler is responsible
+            // for stripping the `view-source:` prefix and fetching the
+            // underlying resource.
+            .shortcut(CMD_OR_CONTROL, 'U', || {
+                if let Some(current) = active_webview.url() {
+                    let scheme = current.scheme();
+                    if scheme == "view-source" || scheme == "about" || scheme == "resource" || scheme == "servo" {
+                        // Don't recurse on view-source: itself, and don't
+                        // try to fetch internal pseudo-URLs over HTTP.
+                        return;
+                    }
+                    if let Ok(view_source_url) =
+                        Url::parse(&format!("view-source:{current}"))
+                    {
+                        window.create_and_activate_toplevel_webview(
+                            state.clone(),
+                            view_source_url,
+                        );
+                    }
+                }
+            })
             .shortcut(CMD_OR_CONTROL, 'Q', || state.schedule_exit())
             .otherwise(|| handled = false);
         handled
