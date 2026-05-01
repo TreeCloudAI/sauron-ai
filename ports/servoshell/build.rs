@@ -54,6 +54,14 @@ fn main() -> Result<(), Box<dyn Error>> {
             let mut res = winresource::WindowsResource::new();
             res.set_icon("../../resources/servo.ico");
             res.set_manifest_file("platform/windows/servoshell.exe.manifest");
+            // Sauron AI display-branding (Strategy A): the crate stays
+            // `servoshell`, but the user-visible Properties dialog and
+            // taskbar metadata advertise Sauron / TreeCloud AI.
+            res.set("ProductName", "Sauron");
+            res.set("FileDescription", "Sauron AI Browser");
+            res.set("CompanyName", "TreeCloud AI");
+            res.set("OriginalFilename", "servoshell.exe");
+            res.set("InternalName", "servoshell");
             res.compile().unwrap();
         }
         #[cfg(not(windows))]

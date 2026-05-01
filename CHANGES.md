@@ -33,6 +33,11 @@ high-level changes per release/branch. For file-level history, use `git log`.
   changed from `("org.servo.Servo", "Servo")` to
   `("com.treecloud.sauron", "Sauron")` so the window can be pinned
   to the taskbar under the Sauron identity.
+- `ports/servoshell/build.rs` — added `winresource` overrides so the
+  Windows .exe Properties dialog reports `ProductName=Sauron`,
+  `FileDescription=Sauron AI Browser`, `CompanyName=TreeCloud AI`.
+  Without these, the defaults derived from the `servoshell` Cargo
+  package leak through to end users.
 - `README.md` — rewritten to describe Sauron AI; build instructions
   retained, attribution to upstream Servo preserved and expanded.
 
