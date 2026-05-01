@@ -47,7 +47,9 @@ use {
 use super::geometry::{winit_position_to_euclid_point, winit_size_to_euclid_size};
 use super::keyutils::{CMD_OR_ALT, keyboard_event_from_winit};
 use crate::desktop::accelerated_gl_media::setup_gl_accelerated_media;
-use crate::desktop::dialog::Dialog;
+use crate::desktop::dialog::{
+    Dialog, SauronContextMenuAction, SauronContextMenuItem,
+};
 use crate::desktop::event_loop::AppEvent;
 use crate::desktop::gui::Gui;
 use crate::desktop::keyutils::CMD_OR_CONTROL;
@@ -275,6 +277,13 @@ impl HeadedWindow {
             return;
         }
 
+        // Sauron AI: open our right-click context menu on right-button
+        // press, in addition to forwarding the event to Servo so any
+        // page-level `contextmenu` handlers still fire.
+        if matches!(button, MouseButton::Right) && matches!(action, ElementState::Pressed) {
+            self.open_sauron_context_menu(webview, point);
+        }
+
         let mouse_button = match &button {
             MouseButton::Left => ServoMouseButton::Left,
             MouseButton::Right => ServoMouseButton::Right,
@@ -294,6 +303,40 @@ impl HeadedWindow {
             mouse_button,
             point.into(),
         )));
+    }
+
+    /// Sauron AI: build and queue a right-click context menu at the given
+    /// webview-relative click position (in device pixels). Internal
+    /// pseudo-URL schemes get only a "Reload" entry since "View Source"
+    /// makes no sense there.
+    fn open_sauron_context_menu(
+        &self,
+        webview: &WebView,
+        point: Point2D<f32, DevicePixel>,
+    ) {
+        let mut items: Vec<SauronContextMenuItem> = Vec::new();
+        if let Some(url) = webview.url() {
+            let scheme = url.scheme();
+            let is_internal = matches!(scheme, "view-source" | "about" | "resource" | "servo");
+            if !is_internal {
+                items.push(SauronContextMenuItem::new(
+                    "View page source",
+                    SauronContextMenuAction::ViewSource(url.to_string()),
+                ));
+            }
+        }
+        items.push(SauronContextMenuItem::new(
+            "Reload",
+            SauronContextMenuAction::Reload,
+        ));
+
+        // egui works in DIP / logical pixels; convert from device pixels.
+        let scale = self.hidpi_scale_factor().0.max(f32::EPSILON);
+        let position = egui::pos2(point.x / scale, point.y / scale);
+        self.add_dialog(
+            webview.id(),
+            Dialog::new_sauron_context_menu(items, position, self.toolbar_height()),
+        );
     }
 
     /// Helper function to handle mouse move events.

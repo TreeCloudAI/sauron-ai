@@ -34,6 +34,7 @@ use winit::event::WindowEvent;
 use winit::event_loop::{ActiveEventLoop, EventLoopProxy};
 use winit::window::Window;
 
+use crate::desktop::dialog::SauronContextMenuAction;
 use crate::desktop::event_loop::AppEvent;
 use crate::desktop::headed_window;
 use crate::running_app_state::{RunningAppState, UserInterfaceCommand};
@@ -575,7 +576,23 @@ impl Gui {
             let scale =
                 Scale::<_, DeviceIndependentPixel, DevicePixel>::new(ctx.pixels_per_point());
 
-            headed_window.for_each_active_dialog(window, |dialog| dialog.update(ctx));
+            headed_window.for_each_active_dialog(window, |dialog| {
+                let still_open = dialog.update(ctx);
+                if let Some(action) = dialog.take_sauron_context_action() {
+                    match action {
+                        SauronContextMenuAction::ViewSource(url) => {
+                            window.queue_user_interface_command(UserInterfaceCommand::Go(
+                                format!("view-source:{url}"),
+                            ));
+                        },
+                        SauronContextMenuAction::Reload => {
+                            window
+                                .queue_user_interface_command(UserInterfaceCommand::Reload);
+                        },
+                    }
+                }
+                still_open
+            });
 
             // If the top parts of the GUI changed size, then update the size of the WebView and also
             // the size of its RenderingContext.

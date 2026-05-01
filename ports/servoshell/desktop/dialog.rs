@@ -56,6 +56,45 @@ pub enum Dialog {
         menu: Option<ContextMenu>,
         toolbar_offset: Length<f32, DeviceIndependentPixel>,
     },
+    /// Sauron AI: a Sauron-driven right-click context menu, distinct from
+    /// Servo's `ContextMenu` (which is engine-requested for things like
+    /// `<select>` dropdowns). Items here are populated by servoshell on
+    /// raw right-clicks and the selected action is consumed by the GUI
+    /// loop via [`Dialog::take_sauron_context_action`].
+    SauronContextMenu {
+        items: Vec<SauronContextMenuItem>,
+        /// Webview-relative position of the click, in device-independent
+        /// pixels. The `toolbar_offset` is added during render to put the
+        /// popup in the right global egui coordinate.
+        position: egui::Pos2,
+        toolbar_offset: Length<f32, DeviceIndependentPixel>,
+        action_taken: Option<SauronContextMenuAction>,
+    },
+}
+
+/// One row in a [`Dialog::SauronContextMenu`].
+pub struct SauronContextMenuItem {
+    pub label: String,
+    pub action: SauronContextMenuAction,
+}
+
+impl SauronContextMenuItem {
+    pub fn new(label: impl Into<String>, action: SauronContextMenuAction) -> Self {
+        Self {
+            label: label.into(),
+            action,
+        }
+    }
+}
+
+/// What a Sauron-defined context-menu item should do when clicked. The GUI
+/// loop translates these into [`UserInterfaceCommand`](crate::running_app_state::UserInterfaceCommand)s.
+#[derive(Clone, Debug)]
+pub enum SauronContextMenuAction {
+    /// Navigate the active webview to `view-source:<url>`.
+    ViewSource(String),
+    /// Reload the active webview.
+    Reload,
 }
 
 impl Dialog {
@@ -714,6 +753,51 @@ impl Dialog {
                 }
                 is_open
             },
+            Dialog::SauronContextMenu {
+                items,
+                position,
+                toolbar_offset,
+                action_taken,
+            } => {
+                let mut is_open = true;
+                let display_pos = pos2(position.x, position.y + toolbar_offset.0);
+
+                let response = Area::new(Id::new("sauron_context_menu"))
+                    .fixed_pos(display_pos)
+                    .order(Order::Foreground)
+                    .show(ctx, |ui| {
+                        Frame::popup(ui.style()).show(ui, |ui| {
+                            ui.set_min_width(MINIMUM_UI_ELEMENT_WIDTH);
+                            for item in items.iter() {
+                                ui.style_mut().visuals.widgets.inactive.weak_bg_fill =
+                                    ui.visuals().panel_fill;
+                                ui.style_mut().visuals.widgets.inactive.bg_fill =
+                                    ui.visuals().panel_fill;
+                                let button = Button::new(
+                                    RichText::new(&item.label)
+                                        .color(ui.visuals().strong_text_color()),
+                                )
+                                .corner_radius(CornerRadius::ZERO)
+                                .stroke(Stroke::NONE)
+                                .wrap_mode(egui::TextWrapMode::Extend)
+                                .min_size(Vec2 {
+                                    x: MINIMUM_UI_ELEMENT_WIDTH,
+                                    y: 0.0,
+                                });
+                                if ui.add(button).clicked() {
+                                    *action_taken = Some(item.action.clone());
+                                    ui.close();
+                                    is_open = false;
+                                }
+                            }
+                        })
+                    });
+
+                if response.response.clicked_elsewhere() {
+                    is_open = false;
+                }
+                is_open
+            },
         }
     }
 
@@ -737,6 +821,32 @@ impl Dialog {
         Dialog::ContextMenu {
             menu: Some(menu),
             toolbar_offset,
+        }
+    }
+
+    /// Build a Sauron-driven right-click context menu at the given
+    /// webview-relative position.
+    pub(crate) fn new_sauron_context_menu(
+        items: Vec<SauronContextMenuItem>,
+        position: egui::Pos2,
+        toolbar_offset: Length<f32, DeviceIndependentPixel>,
+    ) -> Dialog {
+        Dialog::SauronContextMenu {
+            items,
+            position,
+            toolbar_offset,
+            action_taken: None,
+        }
+    }
+
+    /// If this dialog is a Sauron context menu and the user just clicked
+    /// an item, return the action and clear the slot. The GUI loop calls
+    /// this after each `update` to dispatch the action.
+    pub(crate) fn take_sauron_context_action(&mut self) -> Option<SauronContextMenuAction> {
+        if let Dialog::SauronContextMenu { action_taken, .. } = self {
+            action_taken.take()
+        } else {
+            None
         }
     }
 }

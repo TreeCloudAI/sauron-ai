@@ -67,6 +67,22 @@ high-level changes per release/branch. For file-level history, use `git log`.
   a new tab. Internal schemes (`view-source`, `about`, `resource`,
   `servo`) are skipped.
 
+### Modified MPL-2.0 files (continued, right-click context menu)
+
+- `ports/servoshell/desktop/dialog.rs` — added `Dialog::SauronContextMenu`
+  variant plus `SauronContextMenuItem` and `SauronContextMenuAction`
+  helper types, an egui renderer, and a `take_sauron_context_action`
+  drain method. Distinct from Servo's engine-driven `ContextMenu` so
+  the two do not conflict.
+- `ports/servoshell/desktop/gui.rs` — after each `Dialog::update`, drain
+  any selected `SauronContextMenuAction` and translate it to a
+  `UserInterfaceCommand` (`Go("view-source:...")` or `Reload`).
+- `ports/servoshell/desktop/headed_window.rs` — on right-button press
+  inside the webview, build and queue a Sauron context menu with a
+  "View page source" item (suppressed for internal schemes) and a
+  "Reload" item. The right-click event is still forwarded to Servo so
+  page-level `contextmenu` handlers fire.
+
 ### Renamed
 
 - `resources/org.servo.Servo.desktop` → `resources/com.treecloud.sauron.desktop`
