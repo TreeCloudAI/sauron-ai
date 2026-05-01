@@ -129,7 +129,7 @@ impl HeadedWindow {
 
         // Set a name so it can be pinned to taskbars in Linux.
         #[cfg(target_os = "linux")]
-        let window_attr = window_attr.with_name("org.servo.Servo", "Servo");
+        let window_attr = window_attr.with_name("com.treecloud.sauron", "Sauron");
 
         #[allow(deprecated)]
         let winit_window = event_loop

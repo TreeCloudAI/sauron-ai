@@ -19,4 +19,33 @@ high-level changes per release/branch. For file-level history, use `git log`.
 
 ## Unreleased
 
-_No modifications to MPL-2.0 files yet._
+### Modified MPL-2.0 files
+
+- `ports/servoshell/platform/macos/Info.plist` — rebranded display
+  strings (`CFBundleName`, `CFBundleGetInfoString`, `CFBundleIdentifier`,
+  Bluetooth usage description) to "Sauron" / `com.treecloud.sauron`.
+  The `CFBundleExecutable` value is intentionally left as `servoshell`
+  to match the unchanged binary name.
+- `ports/servoshell/platform/windows/servoshell.exe.manifest` —
+  `assemblyIdentity name` changed from `servo.ServoShell` to
+  `treecloud.Sauron`.
+- `ports/servoshell/desktop/headed_window.rs` — Linux WM_CLASS
+  changed from `("org.servo.Servo", "Servo")` to
+  `("com.treecloud.sauron", "Sauron")` so the window can be pinned
+  to the taskbar under the Sauron identity.
+- `README.md` — rewritten to describe Sauron AI; build instructions
+  retained, attribution to upstream Servo preserved and expanded.
+
+### Renamed
+
+- `resources/org.servo.Servo.desktop` → `resources/com.treecloud.sauron.desktop`
+  with display strings rebranded. The `Exec=` path still points at the
+  unchanged `servoshell` binary.
+
+### Added (non-MPL, Apache-2.0)
+
+- `NOTICE.md` — fork attribution and licensing boundary.
+- `LICENSE-SAURON` — Apache-2.0 for new TreeCloud AI components.
+- `resources/sauron.svg` — Sauron logo (vector). PNG/ICO/ICNS variants
+  pending — until they exist, the macOS bundle and Windows .exe still
+  embed Servo's icons.
