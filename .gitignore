@@ -78,3 +78,7 @@ support/macos/Brewfile.lock.json
 
 # Justfiles
 justfile
+
+# Sauron AI: local build/bootstrap logs
+.bootstrap.log
+.build*.log
